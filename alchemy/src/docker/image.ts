@@ -54,6 +54,14 @@ export interface DockerBuildOptions {
    *
    */
   cacheTo?: string[];
+
+  /**
+   * Additional options to pass to the Docker build command. This serves as an escape hatch for any additional options that are not supported by the other properties.
+   *
+   * @see https://docs.docker.com/reference/cli/docker/buildx/build/#options
+   *
+   */
+  options?: string[];
 }
 
 export interface ImageRegistry {
@@ -181,7 +189,7 @@ export const Image = Resource(
       const buildOptions: Record<string, string> = props.build?.args || {};
 
       // Add platform if specified
-      let buildArgs = ["build", "-t", imageRef];
+      const buildArgs = ["build", "-t", imageRef];
 
       if (props.build?.platform) {
         buildArgs.push("--platform", props.build.platform);
@@ -209,6 +217,11 @@ export const Image = Resource(
       // Add build arguments
       for (const [key, value] of Object.entries(buildOptions)) {
         buildArgs.push("--build-arg", `${key}=${value}`);
+      }
+
+      // Add build options if specified
+      if (props.build?.options && props.build.options.length > 0) {
+        buildArgs.push(...props.build.options);
       }
 
       buildArgs.push("-f", dockerfile);
