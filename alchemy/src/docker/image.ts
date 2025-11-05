@@ -40,9 +40,20 @@ export interface DockerBuildOptions {
   target?: string;
 
   /**
-   * List of images to use for cache
+   * Use an external cache source for a build
+   *
+   * @see https://docs.docker.com/reference/cli/docker/buildx/build/#cache-from
+   *
    */
   cacheFrom?: string[];
+
+  /**
+   * Export build cache to an external cache destination
+   *
+   * @see https://docs.docker.com/reference/cli/docker/buildx/build/#cache-to
+   *
+   */
+  cacheTo?: string[];
 }
 
 export interface ImageRegistry {
@@ -185,6 +196,13 @@ export const Image = Resource(
       if (props.build?.cacheFrom && props.build.cacheFrom.length > 0) {
         for (const cacheSource of props.build.cacheFrom) {
           buildArgs.push("--cache-from", cacheSource);
+        }
+      }
+
+      // Add cache destinations if specified
+      if (props.build?.cacheTo && props.build.cacheTo.length > 0) {
+        for (const cacheTarget of props.build.cacheTo) {
+          buildArgs.push("--cache-to", cacheTarget);
         }
       }
 
